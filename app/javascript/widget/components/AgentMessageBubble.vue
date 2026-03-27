@@ -94,12 +94,6 @@ export default {
         messageId: this.messageId,
       });
     },
-    onCardSelect(item) {
-      this.onResponse({
-        submittedValues: [{ title: item.title, value: item.title }],
-        messageId: this.messageId,
-      });
-    },
     onFormSubmit(formValues) {
       const formValuesAsArray = Object.keys(formValues).map(key => ({
         name: key,
@@ -187,7 +181,6 @@ export default {
             :title="item.title"
             :description="item.description"
             :actions="item.actions"
-            @select="onCardSelect(item)"
           />
         </div>
         <button
@@ -209,9 +202,9 @@ export default {
         />
       </div>
 
-      <!-- Swipe hint -->
+      <!-- Hint -->
       <div v-if="hasMultipleCards && showSwipeHint" class="swipe-hint">
-        <span class="swipe-hint-text">← swipe for more →</span>
+        <span class="swipe-hint-text">← more options →</span>
       </div>
     </div>
     <div v-if="isArticle">
@@ -273,7 +266,7 @@ export default {
 /* Cards track */
 .cards-track {
   display: flex;
-  overflow-x: auto;
+  overflow-x: hidden;
   gap: 10px;
   padding: 4px 2px;
   scroll-snap-type: x mandatory;
@@ -306,7 +299,7 @@ export default {
   border-radius: 3px;
 }
 
-/* Swipe hint */
+/* Hint */
 .swipe-hint {
   text-align: center;
   padding: 4px 0 2px 0;
