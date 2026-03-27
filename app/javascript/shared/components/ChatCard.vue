@@ -25,12 +25,6 @@ export default {
       default: () => [],
     },
   },
-  emits: ['select'],
-  data() {
-    return {
-      isSelected: false,
-    };
-  },
   computed: {
     ...mapGetters({
       widgetColor: 'appConfig/getWidgetColor',
@@ -39,20 +33,11 @@ export default {
       return getContrastingTextColor(this.widgetColor);
     },
   },
-  methods: {
-    onSelect() {
-      this.isSelected = true;
-      this.$emit('select');
-    },
-  },
 };
 </script>
 
 <template>
-  <div
-    class="carousel-card"
-    :class="{ 'carousel-card--selected': isSelected }"
-  >
+  <div class="carousel-card">
     <img
       v-if="mediaUrl"
       class="carousel-card__image"
@@ -73,14 +58,6 @@ export default {
           :action="action"
           class="carousel-card__view-btn"
         />
-        <button
-          class="carousel-card__select-btn"
-          :style="{ background: isSelected ? '#22c55e' : widgetColor }"
-          :disabled="isSelected"
-          @click="onSelect"
-        >
-          {{ isSelected ? 'Selected ✓' : 'Select' }}
-        </button>
       </div>
     </div>
   </div>
@@ -102,10 +79,6 @@ export default {
 .carousel-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-}
-.carousel-card--selected {
-  border: 2px solid #1b8ceb;
-  box-shadow: 0 2px 12px rgba(27, 140, 235, 0.25);
 }
 
 /* Image */
@@ -161,27 +134,6 @@ export default {
   padding: 5px 0 !important;
   border-radius: 8px !important;
   margin-top: 0 !important;
-}
-
-/* Select button */
-.carousel-card__select-btn {
-  flex: 1;
-  padding: 5px 0;
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
-}
-.carousel-card__select-btn:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: scale(0.98);
-}
-.carousel-card__select-btn:disabled {
-  cursor: default;
 }
 
 /* Dark mode */
