@@ -105,6 +105,12 @@ export default {
         messageId: this.messageId,
       });
     },
+    onCardSelect(payload) {
+      this.onResponse({
+        submittedValues: [{ title: payload, value: payload }],
+        messageId: this.messageId,
+      });
+    },
     onFormSubmit(formValues) {
       const formValuesAsArray = Object.keys(formValues).map(key => ({
         name: key,
@@ -213,6 +219,7 @@ export default {
               :title="item.title"
               :description="item.description"
               :actions="item.actions"
+              @select="onCardSelect"
             />
           </div>
         </div>
