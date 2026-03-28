@@ -33,8 +33,6 @@ export default {
     return {
       activeCardIndex: 0,
       showSwipeHint: true,
-      translateX: 0,
-      touchStartX: null,
     };
   },
   setup() {
@@ -78,15 +76,6 @@ export default {
     hasMultipleCards() {
       return this.cardItems.length > 2;
     },
-    maxIndex() {
-      return Math.max(0, this.cardItems.length - 2);
-    },
-    trackStyle() {
-      return {
-        transform: 'translateX(' + this.translateX + 'px)',
-        transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-      };
-    },
   },
   mounted() {
     if (this.isCards && this.hasMultipleCards) {
@@ -105,12 +94,6 @@ export default {
         messageId: this.messageId,
       });
     },
-    onCardSelect(payload) {
-      this.onResponse({
-        submittedValues: [{ title: payload, value: payload }],
-        messageId: this.messageId,
-      });
-    },
     onFormSubmit(formValues) {
       const formValuesAsArray = Object.keys(formValues).map(key => ({
         name: key,
@@ -122,31 +105,22 @@ export default {
       });
     },
     scrollCarousel(direction) {
-      var cardStep = 185;
-      var newIndex = this.activeCardIndex + direction;
-      if (newIndex < 0) {
-        newIndex = 0;
+      const track = this.$refs.cardsTrack;
+      if (track) {
+        track.scrollBy({ left: direction * 185, behavior: 'smooth' });
       }
-      if (newIndex > this.maxIndex) {
-        newIndex = this.maxIndex;
-      }
-      this.activeCardIndex = newIndex;
-      this.translateX = -(newIndex * cardStep);
     },
-    onTouchStart(e) {
-      this.touchStartX = e.touches[0].clientX;
-    },
-    onTouchEnd(e) {
-      if (this.touchStartX === null) return;
-      var diff = this.touchStartX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 40) {
-        if (diff > 0) {
-          this.scrollCarousel(1);
-        } else {
-          this.scrollCarousel(-1);
-        }
+    onCarouselScroll() {
+      const track = this.$refs.cardsTrack;
+      if (track) {
+        this.activeCardIndex = Math.round(track.scrollLeft / 185);
       }
-      this.touchStartX = null;
+    },
+    onCardSelect(payload) {
+      this.onResponse({
+        submittedValues: [{ title: payload, value: payload }],
+        messageId: this.messageId,
+      });
     },
   },
 };
@@ -196,38 +170,29 @@ export default {
       <div class="carousel-row">
         <button
           v-if="hasMultipleCards"
-          class="carousel-arrow"
-          :class="{ 'carousel-arrow--disabled': activeCardIndex === 0 }"
-          :disabled="activeCardIndex === 0"
+          class="carousel-arrow carousel-arrow-left"
           @click="scrollCarousel(-1)"
         >
           ‹
         </button>
         <div
-          class="cards-viewport"
-          @touchstart="onTouchStart"
-          @touchend="onTouchEnd"
+          ref="cardsTrack"
+          class="cards-track"
+          @scroll="onCarouselScroll"
         >
-          <div
-            class="cards-track"
-            :style="trackStyle"
-          >
-            <ChatCard
-              v-for="item in cardItems"
-              :key="item.title"
-              :media-url="item.media_url"
-              :title="item.title"
-              :description="item.description"
-              :actions="item.actions"
-              @select="onCardSelect"
-            />
-          </div>
+          <ChatCard
+            v-for="item in cardItems"
+            :key="item.title"
+            :media-url="item.media_url"
+            :title="item.title"
+            :description="item.description"
+            :actions="item.actions"
+            @select="onCardSelect"
+          />
         </div>
         <button
           v-if="hasMultipleCards"
-          class="carousel-arrow"
-          :class="{ 'carousel-arrow--disabled': activeCardIndex >= maxIndex }"
-          :disabled="activeCardIndex >= maxIndex"
+          class="carousel-arrow carousel-arrow-right"
           @click="scrollCarousel(1)"
         >
           ›
@@ -246,7 +211,7 @@ export default {
 
       <!-- Hint -->
       <div v-if="hasMultipleCards && showSwipeHint" class="swipe-hint">
-        <span class="swipe-hint-text">← more options →</span>
+        <span class="swipe-hint-text">← more fabrics →</span>
       </div>
     </div>
     <div v-if="isArticle">
@@ -276,19 +241,6 @@ export default {
   gap: 4px;
 }
 
-/* Viewport - clips overflow */
-.cards-viewport {
-  flex: 1;
-  overflow: hidden;
-}
-
-/* Cards track - slides via transform */
-.cards-track {
-  display: flex;
-  gap: 10px;
-  padding: 4px 2px;
-}
-
 /* Arrow buttons */
 .carousel-arrow {
   width: 28px;
@@ -309,17 +261,30 @@ export default {
   padding: 0;
   line-height: 1;
 }
-.carousel-arrow:hover:not(:disabled) {
+.carousel-arrow:hover {
   background: #f5f5f5;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   color: #1b8ceb;
 }
-.carousel-arrow:active:not(:disabled) {
+.carousel-arrow:active {
   transform: scale(0.95);
 }
-.carousel-arrow--disabled {
-  opacity: 0.3;
-  cursor: default;
+
+/* Cards track — KEY FIX: overflow-x: auto + touch-action: pan-y */
+.cards-track {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 4px 2px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex: 1;
+  scroll-behavior: smooth;
+  touch-action: pan-y;
+}
+.cards-track::-webkit-scrollbar {
+  display: none;
 }
 
 /* Dot indicators */
@@ -379,13 +344,13 @@ export default {
   }
 }
 
-/* Dark mode */
+/* Dark mode arrow support */
 :global(.dark) .carousel-arrow {
   background: #2a2a2a;
   border-color: #444;
   color: #ccc;
 }
-:global(.dark) .carousel-arrow:hover:not(:disabled) {
+:global(.dark) .carousel-arrow:hover {
   background: #333;
   color: #1b8ceb;
 }
