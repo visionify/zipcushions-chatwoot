@@ -33,6 +33,7 @@ export default {
     return {
       activeCardIndex: 0,
       showSwipeHint: true,
+      touchStartX: null,
     };
   },
   setup() {
@@ -74,7 +75,22 @@ export default {
       return this.messageContentAttributes?.items || [];
     },
     hasMultipleCards() {
-      return this.cardItems.length > 2;
+      return this.cardItems.length > 1;
+    },
+    totalCards() {
+      return this.cardItems.length;
+    },
+    trackStyle() {
+      return {
+        transform: 'translateX(' + (-this.activeCardIndex * 100) + '%)',
+        transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      };
+    },
+    canGoPrev() {
+      return this.activeCardIndex > 0;
+    },
+    canGoNext() {
+      return this.activeCardIndex < this.totalCards - 1;
     },
   },
   mounted() {
@@ -104,17 +120,39 @@ export default {
         messageId: this.messageId,
       });
     },
-    scrollCarousel(direction) {
-      const track = this.$refs.cardsTrack;
-      if (track) {
-        track.scrollBy({ left: direction * 185, behavior: 'smooth' });
+    goToCard(index) {
+      if (index >= 0 && index < this.totalCards) {
+        this.activeCardIndex = index;
       }
     },
-    onCarouselScroll() {
-      const track = this.$refs.cardsTrack;
-      if (track) {
-        this.activeCardIndex = Math.round(track.scrollLeft / 185);
+    prevCard() {
+      if (this.canGoPrev) {
+        this.activeCardIndex--;
       }
+    },
+    nextCard() {
+      if (this.canGoNext) {
+        this.activeCardIndex++;
+      }
+    },
+    onTouchStart(e) {
+      this.touchStartX = e.touches[0].clientX;
+    },
+    onTouchMove(e) {
+      if (this.touchStartX !== null) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },
+    onTouchEnd(e) {
+      if (this.touchStartX === null) return;
+      var diff = this.touchStartX - e.changedTouches[0].clientX;
+      if (diff > 40) {
+        this.nextCard();
+      } else if (diff < -40) {
+        this.prevCard();
+      }
+      this.touchStartX = null;
     },
     onCardSelect(payload) {
       this.onResponse({
@@ -166,52 +204,59 @@ export default {
       @submit="onFormSubmit"
     />
     <div v-if="isCards" class="carousel-wrapper">
-      <!-- Arrow + Cards Row -->
       <div class="carousel-row">
         <button
           v-if="hasMultipleCards"
           class="carousel-arrow carousel-arrow-left"
-          @click="scrollCarousel(-1)"
+          :class="{ disabled: !canGoPrev }"
+          @click="prevCard"
         >
           ‹
         </button>
         <div
-          ref="cardsTrack"
-          class="cards-track"
-          @scroll="onCarouselScroll"
+          class="cards-viewport"
+          @touchstart="onTouchStart"
+          @touchmove.prevent.stop="onTouchMove"
+          @touchend="onTouchEnd"
         >
-          <ChatCard
-            v-for="item in cardItems"
-            :key="item.title"
-            :media-url="item.media_url"
-            :title="item.title"
-            :description="item.description"
-            :actions="item.actions"
-            @select="onCardSelect"
-          />
+          <div class="cards-track" :style="trackStyle">
+            <div
+              v-for="item in cardItems"
+              :key="item.title"
+              class="card-slide"
+            >
+              <ChatCard
+                :media-url="item.media_url"
+                :title="item.title"
+                :description="item.description"
+                :actions="item.actions"
+                @select="onCardSelect"
+              />
+            </div>
+          </div>
         </div>
         <button
           v-if="hasMultipleCards"
           class="carousel-arrow carousel-arrow-right"
-          @click="scrollCarousel(1)"
+          :class="{ disabled: !canGoNext }"
+          @click="nextCard"
         >
           ›
         </button>
       </div>
 
-      <!-- Dot indicators -->
       <div v-if="hasMultipleCards" class="carousel-dots">
         <span
           v-for="(item, index) in cardItems"
           :key="'dot-' + index"
           class="carousel-dot"
           :class="{ active: index === activeCardIndex }"
+          @click="goToCard(index)"
         />
       </div>
 
-      <!-- Hint -->
       <div v-if="hasMultipleCards && showSwipeHint" class="swipe-hint">
-        <span class="swipe-hint-text">← more fabrics →</span>
+        <span class="swipe-hint-text">← more options →</span>
       </div>
     </div>
     <div v-if="isArticle">
@@ -228,20 +273,17 @@ export default {
 </template>
 
 <style scoped>
-/* Carousel wrapper */
 .carousel-wrapper {
   max-width: 100%;
   padding: 4px 0;
 }
 
-/* Arrow + cards row */
 .carousel-row {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-/* Arrow buttons */
 .carousel-arrow {
   width: 28px;
   height: 28px;
@@ -269,25 +311,30 @@ export default {
 .carousel-arrow:active {
   transform: scale(0.95);
 }
+.carousel-arrow.disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
 
-/* Cards track — KEY FIX: overflow-x: auto + touch-action: pan-y */
-.cards-track {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding: 4px 2px;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+.cards-viewport {
+  overflow: hidden;
   flex: 1;
-  scroll-behavior: smooth;
   touch-action: pan-y;
 }
-.cards-track::-webkit-scrollbar {
-  display: none;
+
+.cards-track {
+  display: flex;
 }
 
-/* Dot indicators */
+.card-slide {
+  min-width: 100%;
+  max-width: 100%;
+  flex-shrink: 0;
+  padding: 4px 6px;
+  box-sizing: border-box;
+}
+
 .carousel-dots {
   display: flex;
   justify-content: center;
@@ -300,6 +347,7 @@ export default {
   border-radius: 50%;
   background: #ddd;
   transition: all 0.3s;
+  cursor: pointer;
 }
 .carousel-dot.active {
   background: #1b8ceb;
@@ -307,7 +355,6 @@ export default {
   border-radius: 3px;
 }
 
-/* Hint */
 .swipe-hint {
   text-align: center;
   padding: 4px 0 2px 0;
@@ -344,7 +391,6 @@ export default {
   }
 }
 
-/* Dark mode arrow support */
 :global(.dark) .carousel-arrow {
   background: #2a2a2a;
   border-color: #444;
