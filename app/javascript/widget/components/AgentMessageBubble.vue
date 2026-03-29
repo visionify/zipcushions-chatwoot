@@ -34,6 +34,8 @@ export default {
       activeCardIndex: 0,
       showSwipeHint: true,
       touchStartX: null,
+      touchStartY: null,
+      isSwiping: false,
     };
   },
   setup() {
@@ -80,9 +82,15 @@ export default {
     totalCards() {
       return this.cardItems.length;
     },
+    maxIndex() {
+      // Last position: show the last 2 cards
+      return Math.max(0, this.totalCards - 2);
+    },
     trackStyle() {
+      // Each card = 50% of viewport. Slide by 50% per step.
+      var offset = this.activeCardIndex * 50;
       return {
-        transform: 'translateX(' + (-this.activeCardIndex * 100) + '%)',
+        transform: 'translateX(-' + offset + '%)',
         transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
       };
     },
@@ -90,7 +98,7 @@ export default {
       return this.activeCardIndex > 0;
     },
     canGoNext() {
-      return this.activeCardIndex < this.totalCards - 1;
+      return this.activeCardIndex < this.maxIndex;
     },
   },
   mounted() {
@@ -98,6 +106,25 @@ export default {
       setTimeout(() => {
         this.showSwipeHint = false;
       }, 5000);
+
+      // CRITICAL: Add non-passive touch listeners so preventDefault() actually works
+      // Vue's @touchmove.prevent does NOT work in modern browsers (passive by default)
+      this.$nextTick(() => {
+        var viewport = this.$refs.cardsViewport;
+        if (viewport) {
+          viewport.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+          viewport.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+          viewport.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+        }
+      });
+    }
+  },
+  beforeUnmount() {
+    var viewport = this.$refs.cardsViewport;
+    if (viewport) {
+      viewport.removeEventListener('touchstart', this.handleTouchStart);
+      viewport.removeEventListener('touchmove', this.handleTouchMove);
+      viewport.removeEventListener('touchend', this.handleTouchEnd);
     }
   },
   methods: {
@@ -121,7 +148,7 @@ export default {
       });
     },
     goToCard(index) {
-      if (index >= 0 && index < this.totalCards) {
+      if (index >= 0 && index <= this.maxIndex) {
         this.activeCardIndex = index;
       }
     },
@@ -135,24 +162,42 @@ export default {
         this.activeCardIndex++;
       }
     },
-    onTouchStart(e) {
+    handleTouchStart(e) {
       this.touchStartX = e.touches[0].clientX;
+      this.touchStartY = e.touches[0].clientY;
+      this.isSwiping = false;
     },
-    onTouchMove(e) {
-      if (this.touchStartX !== null) {
+    handleTouchMove(e) {
+      if (this.touchStartX === null) return;
+
+      var diffX = Math.abs(e.touches[0].clientX - this.touchStartX);
+      var diffY = Math.abs(e.touches[0].clientY - this.touchStartY);
+
+      // If horizontal movement > vertical, it's a card swipe — block scroll
+      if (diffX > diffY && diffX > 10) {
+        this.isSwiping = true;
         e.preventDefault();
         e.stopPropagation();
       }
     },
-    onTouchEnd(e) {
+    handleTouchEnd(e) {
       if (this.touchStartX === null) return;
+
       var diff = this.touchStartX - e.changedTouches[0].clientX;
-      if (diff > 40) {
-        this.nextCard();
-      } else if (diff < -40) {
-        this.prevCard();
+
+      if (this.isSwiping) {
+        if (diff > 40) {
+          this.nextCard();
+        } else if (diff < -40) {
+          this.prevCard();
+        }
+        e.preventDefault();
+        e.stopPropagation();
       }
+
       this.touchStartX = null;
+      this.touchStartY = null;
+      this.isSwiping = false;
     },
     onCardSelect(payload) {
       this.onResponse({
@@ -214,10 +259,8 @@ export default {
           ‹
         </button>
         <div
+          ref="cardsViewport"
           class="cards-viewport"
-          @touchstart="onTouchStart"
-          @touchmove.prevent.stop="onTouchMove"
-          @touchend="onTouchEnd"
         >
           <div class="cards-track" :style="trackStyle">
             <div
@@ -281,16 +324,16 @@ export default {
 .carousel-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .carousel-arrow {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 1px solid #e0e0e0;
   background: #fff;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
@@ -302,6 +345,7 @@ export default {
   user-select: none;
   padding: 0;
   line-height: 1;
+  z-index: 2;
 }
 .carousel-arrow:hover {
   background: #f5f5f5;
@@ -317,21 +361,25 @@ export default {
   pointer-events: none;
 }
 
+/* Viewport — clips cards, NO scroll, NO touch propagation */
 .cards-viewport {
   overflow: hidden;
   flex: 1;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
+/* Track — moves via translateX */
 .cards-track {
   display: flex;
+  will-change: transform;
 }
 
+/* Each card = 50% width so 2 cards show at once */
 .card-slide {
-  min-width: 100%;
-  max-width: 100%;
+  min-width: 50%;
+  max-width: 50%;
   flex-shrink: 0;
-  padding: 4px 6px;
+  padding: 4px 4px;
   box-sizing: border-box;
 }
 
