@@ -345,6 +345,8 @@ export default {
   width: 100% !important;
   max-width: 100% !important;
   touch-action: none;
+  padding-right: 4px;
+  box-sizing: border-box;
 }
 
 /* ===== TRACK — flex row, NO width set ===== */
@@ -360,7 +362,7 @@ export default {
   min-width: 50% !important;
   max-width: 50% !important;
   flex: 0 0 50% !important;
-  padding: 2px;
+  padding: 2px 4px;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
