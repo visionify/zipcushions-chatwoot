@@ -336,7 +336,7 @@ export default {
   position: relative;
   width: 100%;
   max-width: 100%;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 /* ===== VIEWPORT — clips everything ===== */
@@ -362,7 +362,7 @@ export default {
   min-width: 42% !important;
   max-width: 42% !important;
   flex: 0 0 42% !important;
-  margin: 2px 4%;
+  margin: 2px 2%;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
