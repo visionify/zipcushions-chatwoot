@@ -98,7 +98,7 @@ export default {
 <style scoped>
 .carousel-card {
   width: 100%;
-  flex-shrink: 0;
+  min-width: 0;
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
