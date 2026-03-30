@@ -31,7 +31,7 @@ export default {
   },
   data() {
     return {
-      activeCardIndex: 0,
+      currentPage: 0,
       showSwipeHint: true,
       touchStartX: null,
       touchStartY: null,
@@ -77,38 +77,37 @@ export default {
       return this.messageContentAttributes?.items || [];
     },
     hasMultipleCards() {
-      return this.cardItems.length > 1;
+      return this.cardItems.length > 2;
     },
     totalCards() {
       return this.cardItems.length;
     },
-    maxIndex() {
-      // Last position: show the last 2 cards
-      return Math.max(0, this.totalCards - 2);
+    cardsPerPage() {
+      return 2;
+    },
+    totalPages() {
+      return Math.ceil(this.totalCards / this.cardsPerPage);
     },
     trackStyle() {
-      // Each card = 50% of viewport. Slide by 50% per step.
-      var offset = this.activeCardIndex * 50;
+      var offset = this.currentPage * 100;
       return {
         transform: 'translateX(-' + offset + '%)',
         transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
       };
     },
     canGoPrev() {
-      return this.activeCardIndex > 0;
+      return this.currentPage > 0;
     },
     canGoNext() {
-      return this.activeCardIndex < this.maxIndex;
+      return this.currentPage < this.totalPages - 1;
     },
   },
   mounted() {
-    if (this.isCards && this.hasMultipleCards) {
+    if (this.isCards && this.totalCards > 2) {
       setTimeout(() => {
         this.showSwipeHint = false;
       }, 5000);
 
-      // CRITICAL: Add non-passive touch listeners so preventDefault() actually works
-      // Vue's @touchmove.prevent does NOT work in modern browsers (passive by default)
       this.$nextTick(() => {
         var viewport = this.$refs.cardsViewport;
         if (viewport) {
@@ -147,19 +146,19 @@ export default {
         messageId: this.messageId,
       });
     },
-    goToCard(index) {
-      if (index >= 0 && index <= this.maxIndex) {
-        this.activeCardIndex = index;
+    goToPage(pageIndex) {
+      if (pageIndex >= 0 && pageIndex < this.totalPages) {
+        this.currentPage = pageIndex;
       }
     },
-    prevCard() {
+    prevPage() {
       if (this.canGoPrev) {
-        this.activeCardIndex--;
+        this.currentPage--;
       }
     },
-    nextCard() {
+    nextPage() {
       if (this.canGoNext) {
-        this.activeCardIndex++;
+        this.currentPage++;
       }
     },
     handleTouchStart(e) {
@@ -173,7 +172,6 @@ export default {
       var diffX = Math.abs(e.touches[0].clientX - this.touchStartX);
       var diffY = Math.abs(e.touches[0].clientY - this.touchStartY);
 
-      // If horizontal movement > vertical, it's a card swipe — block scroll
       if (diffX > diffY && diffX > 10) {
         this.isSwiping = true;
         e.preventDefault();
@@ -187,9 +185,9 @@ export default {
 
       if (this.isSwiping) {
         if (diff > 40) {
-          this.nextCard();
+          this.nextPage();
         } else if (diff < -40) {
-          this.prevCard();
+          this.prevPage();
         }
         e.preventDefault();
         e.stopPropagation();
@@ -249,15 +247,17 @@ export default {
       @submit="onFormSubmit"
     />
     <div v-if="isCards" class="carousel-wrapper">
-      <div class="carousel-row">
+      <!-- Arrow buttons OUTSIDE the viewport, positioned absolutely -->
+      <div class="carousel-container">
         <button
           v-if="hasMultipleCards"
           class="carousel-arrow carousel-arrow-left"
           :class="{ disabled: !canGoPrev }"
-          @click="prevCard"
+          @click="prevPage"
         >
           ‹
         </button>
+
         <div
           ref="cardsViewport"
           class="cards-viewport"
@@ -278,23 +278,25 @@ export default {
             </div>
           </div>
         </div>
+
         <button
           v-if="hasMultipleCards"
           class="carousel-arrow carousel-arrow-right"
           :class="{ disabled: !canGoNext }"
-          @click="nextCard"
+          @click="nextPage"
         >
           ›
         </button>
       </div>
 
+      <!-- Page dots (not per-card dots) -->
       <div v-if="hasMultipleCards" class="carousel-dots">
         <span
-          v-for="(item, index) in cardItems"
-          :key="'dot-' + index"
+          v-for="page in totalPages"
+          :key="'page-' + page"
           class="carousel-dot"
-          :class="{ active: index === activeCardIndex }"
-          @click="goToCard(index)"
+          :class="{ active: (page - 1) === currentPage }"
+          @click="goToPage(page - 1)"
         />
       </div>
 
@@ -319,23 +321,27 @@ export default {
 .carousel-wrapper {
   max-width: 100%;
   padding: 4px 0;
+  overflow: hidden;
 }
 
-.carousel-row {
+.carousel-container {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 2px;
 }
 
 .carousel-arrow {
-  width: 26px;
-  height: 26px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: 1px solid #e0e0e0;
-  background: #fff;
-  font-size: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 15px;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -345,7 +351,13 @@ export default {
   user-select: none;
   padding: 0;
   line-height: 1;
-  z-index: 2;
+  z-index: 5;
+}
+.carousel-arrow-left {
+  left: 2px;
+}
+.carousel-arrow-right {
+  right: 2px;
 }
 .carousel-arrow:hover {
   background: #f5f5f5;
@@ -353,7 +365,7 @@ export default {
   color: #1b8ceb;
 }
 .carousel-arrow:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 .carousel-arrow.disabled {
   opacity: 0.3;
@@ -361,28 +373,59 @@ export default {
   pointer-events: none;
 }
 
-/* Viewport — clips cards, NO scroll, NO touch propagation */
+/* Viewport — takes full width, clips cards, NO scroll */
 .cards-viewport {
   overflow: hidden;
-  flex: 1;
+  width: 100%;
   touch-action: none;
 }
 
-/* Track — moves via translateX */
+/* Track — holds all cards in a row, slides by page (100%) */
 .cards-track {
   display: flex;
   will-change: transform;
 }
 
-/* Each card = 50% width so 2 cards show at once */
+/* Each card = exactly 50% so 2 cards fill the viewport */
 .card-slide {
   min-width: 50%;
   max-width: 50%;
   flex-shrink: 0;
-  padding: 4px 4px;
+  padding: 4px;
   box-sizing: border-box;
 }
 
+/* Force card images and content to stay within bounds */
+.card-slide :deep(.chat-card) {
+  max-width: 100%;
+  overflow: hidden;
+}
+.card-slide :deep(.chat-card img) {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 120px;
+}
+.card-slide :deep(.chat-card .title) {
+  font-size: 13px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.card-slide :deep(.chat-card .description) {
+  font-size: 11px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Page dots */
 .carousel-dots {
   display: flex;
   justify-content: center;
@@ -416,31 +459,18 @@ export default {
   display: inline-block;
 }
 @keyframes bounceHint {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 @keyframes fadeHint {
-  0% {
-    opacity: 1;
-  }
-  75% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+  0% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 :global(.dark) .carousel-arrow {
-  background: #2a2a2a;
+  background: rgba(42, 42, 42, 0.92);
   border-color: #444;
   color: #ccc;
 }
