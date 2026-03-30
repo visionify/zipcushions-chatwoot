@@ -247,17 +247,7 @@ export default {
       @submit="onFormSubmit"
     />
     <div v-if="isCards" class="carousel-wrapper">
-      <!-- Arrow buttons OUTSIDE the viewport, positioned absolutely -->
       <div class="carousel-container">
-        <button
-          v-if="hasMultipleCards"
-          class="carousel-arrow carousel-arrow-left"
-          :class="{ disabled: !canGoPrev }"
-          @click="prevPage"
-        >
-          ‹
-        </button>
-
         <div
           ref="cardsViewport"
           class="cards-viewport"
@@ -279,6 +269,15 @@ export default {
           </div>
         </div>
 
+        <!-- Arrows overlaid ON TOP of cards — zero layout impact -->
+        <button
+          v-if="hasMultipleCards"
+          class="carousel-arrow carousel-arrow-left"
+          :class="{ disabled: !canGoPrev }"
+          @click="prevPage"
+        >
+          ‹
+        </button>
         <button
           v-if="hasMultipleCards"
           class="carousel-arrow carousel-arrow-right"
@@ -289,7 +288,7 @@ export default {
         </button>
       </div>
 
-      <!-- Page dots (not per-card dots) -->
+      <!-- Page dots -->
       <div v-if="hasMultipleCards" class="carousel-dots">
         <span
           v-for="page in totalPages"
@@ -301,7 +300,7 @@ export default {
       </div>
 
       <div v-if="hasMultipleCards && showSwipeHint" class="swipe-hint">
-        <span class="swipe-hint-text">← more options →</span>
+        <span class="swipe-hint-text">← swipe or tap arrows →</span>
       </div>
     </div>
     <div v-if="isArticle">
@@ -318,119 +317,166 @@ export default {
 </template>
 
 <style scoped>
+/* ===== OVERFLOW KILL — every level locked ===== */
+.chat-bubble-wrap {
+  overflow-x: hidden !important;
+  overflow-y: visible;
+  max-width: 100% !important;
+  width: 100%;
+}
+
 .carousel-wrapper {
+  width: 100%;
   max-width: 100%;
   padding: 4px 0;
-  overflow: hidden;
+  overflow: hidden !important;
 }
 
 .carousel-container {
   position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 1px solid #e0e0e0;
-  background: rgba(255, 255, 255, 0.92);
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #555;
-  transition: all 0.2s;
-  user-select: none;
-  padding: 0;
-  line-height: 1;
-  z-index: 5;
-}
-.carousel-arrow-left {
-  left: 2px;
-}
-.carousel-arrow-right {
-  right: 2px;
-}
-.carousel-arrow:hover {
-  background: #f5f5f5;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  color: #1b8ceb;
-}
-.carousel-arrow:active {
-  transform: translateY(-50%) scale(0.95);
-}
-.carousel-arrow.disabled {
-  opacity: 0.3;
-  cursor: default;
-  pointer-events: none;
-}
-
-/* Viewport — takes full width, clips cards, NO scroll */
-.cards-viewport {
-  overflow: hidden;
   width: 100%;
+  max-width: 100%;
+  overflow: hidden !important;
+}
+
+/* ===== VIEWPORT — clips everything ===== */
+.cards-viewport {
+  overflow: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
   touch-action: none;
 }
 
-/* Track — holds all cards in a row, slides by page (100%) */
+/* ===== TRACK — flex row, NO width set ===== */
+/* Track naturally expands to hold all cards; viewport clips it */
 .cards-track {
   display: flex;
   will-change: transform;
 }
 
-/* Each card = exactly 50% so 2 cards fill the viewport */
+/* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  min-width: 50%;
-  max-width: 50%;
-  flex-shrink: 0;
-  padding: 4px;
-  box-sizing: border-box;
+  width: 50% !important;
+  min-width: 50% !important;
+  max-width: 50% !important;
+  flex: 0 0 50% !important;
+  padding: 2px;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
-/* Force card images and content to stay within bounds */
+/* ===== FORCE ChatCard internals to obey container ===== */
+.card-slide :deep(*) {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 .card-slide :deep(.chat-card) {
-  max-width: 100%;
-  overflow: hidden;
-}
-.card-slide :deep(.chat-card img) {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  max-height: 120px;
-}
-.card-slide :deep(.chat-card .title) {
-  font-size: 13px;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-.card-slide :deep(.chat-card .description) {
-  font-size: 11px;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
 }
 
-/* Page dots */
+.card-slide :deep(img),
+.card-slide :deep(video) {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: cover;
+  max-height: 100px;
+  display: block;
+}
+
+.card-slide :deep(h4),
+.card-slide :deep(h5),
+.card-slide :deep(.title) {
+  font-size: 12px !important;
+  line-height: 1.3 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  word-wrap: break-word !important;
+  margin: 2px 0 !important;
+}
+
+.card-slide :deep(p),
+.card-slide :deep(.description) {
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  word-wrap: break-word !important;
+  margin: 2px 0 !important;
+}
+
+.card-slide :deep(a),
+.card-slide :deep(button) {
+  font-size: 11px !important;
+  padding: 5px 6px !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+/* ===== ARROWS — absolute overlay, zero layout impact ===== */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  transition: all 0.2s;
+  user-select: none;
+  padding: 0;
+  line-height: 1;
+  z-index: 10;
+}
+.carousel-arrow-left {
+  left: 3px;
+}
+.carousel-arrow-right {
+  right: 3px;
+}
+.carousel-arrow:hover {
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  color: #1b8ceb;
+}
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(0.9);
+}
+.carousel-arrow.disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== PAGE DOTS ===== */
 .carousel-dots {
   display: flex;
   justify-content: center;
   gap: 5px;
-  padding: 8px 0 4px 0;
+  padding: 6px 0 2px 0;
 }
 .carousel-dot {
   width: 6px;
@@ -446,15 +492,16 @@ export default {
   border-radius: 3px;
 }
 
+/* ===== SWIPE HINT ===== */
 .swipe-hint {
   text-align: center;
   padding: 4px 0 2px 0;
   animation: fadeHint 5s ease forwards;
 }
 .swipe-hint-text {
-  font-size: 11px;
+  font-size: 10px;
   color: #aaa;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   animation: bounceHint 1.5s ease-in-out 3;
   display: inline-block;
 }
@@ -469,16 +516,31 @@ export default {
   100% { opacity: 0; }
 }
 
+/* ===== DARK MODE ===== */
 :global(.dark) .carousel-arrow {
-  background: rgba(42, 42, 42, 0.92);
-  border-color: #444;
+  background: rgba(42, 42, 42, 0.88);
   color: #ccc;
 }
 :global(.dark) .carousel-arrow:hover {
-  background: #333;
+  background: rgba(50, 50, 50, 0.97);
   color: #1b8ceb;
 }
 :global(.dark) .carousel-dot {
   background: #444;
+}
+</style>
+
+<!-- UNSCOPED — kills horizontal scroll on ALL parent containers above this component -->
+<style>
+.conversation-wrap,
+.conversation--container,
+.messages-list,
+.conversation-panel,
+.widget-body,
+.woot-widget-wrap,
+.chat-conversation--container,
+.conversation-panel > div,
+.messages-list > div {
+  overflow-x: hidden !important;
 }
 </style>
