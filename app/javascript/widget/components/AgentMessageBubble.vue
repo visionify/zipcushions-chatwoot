@@ -358,11 +358,11 @@ export default {
 
 /* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  width: 44% !important;
-  min-width: 44% !important;
-  max-width: 44% !important;
-  flex: 0 0 44% !important;
-  margin: 2px 3%;
+  width: 42% !important;
+  min-width: 42% !important;
+  max-width: 42% !important;
+  flex: 0 0 42% !important;
+  margin: 2px 4%;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
@@ -372,7 +372,8 @@ export default {
   box-sizing: border-box !important;
 }
 
-.card-slide :deep(.chat-card) {
+.card-slide :deep(.chat-card),
+.card-slide :deep(.carousel-card) {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -382,7 +383,8 @@ export default {
 }
 
 .card-slide :deep(img),
-.card-slide :deep(video) {
+.card-slide :deep(video),
+.card-slide :deep(.carousel-card__image) {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
