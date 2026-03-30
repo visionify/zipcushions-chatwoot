@@ -97,16 +97,15 @@ export default {
 
 <style scoped>
 .carousel-card {
-  min-width: 175px;
-  max-width: 175px;
+  width: 100%;
   flex-shrink: 0;
-  scroll-snap-align: start;
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
   border: 1px solid rgba(0, 0, 0, 0.06);
   transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 .carousel-card:hover {
   transform: translateY(-2px);
@@ -120,23 +119,23 @@ export default {
 /* Image */
 .carousel-card__image {
   width: 100%;
-  height: 120px;
+  height: 100px;
   object-fit: cover;
   display: block;
 }
 
 /* Body */
 .carousel-card__body {
-  padding: 10px 12px;
+  padding: 8px 10px;
 }
 
 /* Title */
 .carousel-card__title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #1a1a1a;
   line-height: 1.3;
-  margin: 0 0 4px 0;
+  margin: 0 0 3px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -145,10 +144,10 @@ export default {
 
 /* Description */
 .carousel-card__desc {
-  font-size: 11px;
+  font-size: 10px;
   color: #888;
-  line-height: 1.4;
-  margin: 0 0 8px 0;
+  line-height: 1.3;
+  margin: 0 0 6px 0;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -158,7 +157,7 @@ export default {
 /* Actions container */
 .carousel-card__actions {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* View button override */
@@ -166,8 +165,8 @@ export default {
   flex: 1;
 }
 .carousel-card__view-btn :deep(.action-button) {
-  font-size: 11px !important;
-  padding: 5px 0 !important;
+  font-size: 10px !important;
+  padding: 4px 0 !important;
   border-radius: 8px !important;
   margin-top: 0 !important;
 }
@@ -175,11 +174,11 @@ export default {
 /* Select button */
 .carousel-card__select-btn {
   flex: 1;
-  padding: 5px 0;
+  padding: 4px 0;
   border: none;
   border-radius: 8px;
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -203,16 +202,5 @@ export default {
 }
 :global(.dark) .carousel-card__desc {
   color: #999;
-}
-
-/* Mobile */
-@media (max-width: 400px) {
-  .carousel-card {
-    min-width: 155px;
-    max-width: 155px;
-  }
-  .carousel-card__image {
-    height: 100px;
-  }
 }
 </style>
