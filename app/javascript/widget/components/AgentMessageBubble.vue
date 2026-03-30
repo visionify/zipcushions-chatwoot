@@ -77,13 +77,13 @@ export default {
       return this.messageContentAttributes?.items || [];
     },
     hasMultipleCards() {
-      return this.cardItems.length > 2;
+      return this.cardItems.length > 1;
     },
     totalCards() {
       return this.cardItems.length;
     },
     cardsPerPage() {
-      return 2;
+      return 1;
     },
     totalPages() {
       return Math.ceil(this.totalCards / this.cardsPerPage);
@@ -358,11 +358,11 @@ export default {
 
 /* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  width: 42% !important;
-  min-width: 42% !important;
-  max-width: 42% !important;
-  flex: 0 0 42% !important;
-  margin: 2px 2%;
+  width: 88% !important;
+  min-width: 88% !important;
+  max-width: 88% !important;
+  flex: 0 0 88% !important;
+  margin: 2px 6%;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
