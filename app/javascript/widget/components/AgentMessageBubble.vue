@@ -358,11 +358,11 @@ export default {
 
 /* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  width: calc(50% - 18px) !important;
-  min-width: calc(50% - 18px) !important;
-  max-width: calc(50% - 18px) !important;
-  flex: 0 0 calc(50% - 18px) !important;
-  margin: 2px 10px;
+  width: 44% !important;
+  min-width: 44% !important;
+  max-width: 44% !important;
+  flex: 0 0 44% !important;
+  margin: 2px 3%;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
