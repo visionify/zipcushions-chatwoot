@@ -358,15 +358,14 @@ export default {
 
 /* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  width: 50% !important;
-  min-width: 50% !important;
-  max-width: 50% !important;
-  flex: 0 0 50% !important;
-  padding: 2px 4px;
+  width: calc(50% - 6px) !important;
+  min-width: calc(50% - 6px) !important;
+  max-width: calc(50% - 6px) !important;
+  flex: 0 0 calc(50% - 6px) !important;
+  margin: 2px 3px;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
-
 /* ===== FORCE ChatCard internals to obey container ===== */
 .card-slide :deep(*) {
   max-width: 100% !important;
