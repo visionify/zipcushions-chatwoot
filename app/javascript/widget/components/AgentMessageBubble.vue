@@ -358,11 +358,11 @@ export default {
 
 /* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  width: 77% !important;
-  min-width: 77% !important;
-  max-width: 77% !important;
-  flex: 0 0 77% !important;
-  margin: 2px 10%;
+  width: 72% !important;
+  min-width: 72% !important;
+  max-width: 72% !important;
+  flex: 0 0 72% !important;
+  margin: 2px auto;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
@@ -456,10 +456,10 @@ export default {
   z-index: 10;
 }
 .carousel-arrow-left {
-  left: 3px;
+  left: -24px;
 }
 .carousel-arrow-right {
-  right: 3px;
+  right: -24px;
 }
 .carousel-arrow:hover {
   background: rgba(255, 255, 255, 0.97);
