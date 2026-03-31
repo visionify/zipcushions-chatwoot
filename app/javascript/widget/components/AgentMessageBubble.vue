@@ -103,7 +103,7 @@ export default {
     },
   },
   mounted() {
-    if (this.isCards && this.totalCards > 1) {
+    if (this.isCards && this.totalCards > 2) {
       setTimeout(() => {
         this.showSwipeHint = false;
       }, 5000);
@@ -268,25 +268,25 @@ export default {
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Arrows OUTSIDE overflow:hidden container, INSIDE carousel-wrapper (overflow:visible) -->
-      <button
-        v-if="hasMultipleCards"
-        class="carousel-arrow carousel-arrow-left"
-        :class="{ disabled: !canGoPrev }"
-        @click="prevPage"
-      >
-        ‹
-      </button>
-      <button
-        v-if="hasMultipleCards"
-        class="carousel-arrow carousel-arrow-right"
-        :class="{ disabled: !canGoNext }"
-        @click="nextPage"
-      >
-        ›
-      </button>
+        <!-- Arrows overlaid ON TOP of cards — zero layout impact -->
+        <button
+          v-if="hasMultipleCards"
+          class="carousel-arrow carousel-arrow-left"
+          :class="{ disabled: !canGoPrev }"
+          @click="prevPage"
+        >
+          ‹
+        </button>
+        <button
+          v-if="hasMultipleCards"
+          class="carousel-arrow carousel-arrow-right"
+          :class="{ disabled: !canGoNext }"
+          @click="nextPage"
+        >
+          ›
+        </button>
+      </div>
 
       <!-- Page dots -->
       <div v-if="hasMultipleCards" class="carousel-dots">
@@ -317,7 +317,7 @@ export default {
 </template>
 
 <style scoped>
-/* ===== LAYOUT ===== */
+/* ===== OVERFLOW KILL — every level locked ===== */
 .chat-bubble-wrap {
   overflow-x: hidden !important;
   overflow-y: visible;
@@ -325,49 +325,47 @@ export default {
   width: 100%;
 }
 
-/* Wrapper is position:relative + overflow:visible so arrows are never clipped */
 .carousel-wrapper {
-  position: relative;
   width: 100%;
   max-width: 100%;
   padding: 4px 0;
   overflow: visible !important;
 }
 
-/* Container clips cards only */
 .carousel-container {
   position: relative;
   width: 100%;
   max-width: 100%;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
-/* ===== VIEWPORT — clips card track ===== */
+/* ===== VIEWPORT — clips everything ===== */
 .cards-viewport {
   overflow: hidden !important;
   width: 100% !important;
   max-width: 100% !important;
   touch-action: none;
+  padding-right: 4px;
   box-sizing: border-box;
 }
 
-/* ===== TRACK — flex row ===== */
+/* ===== TRACK — flex row, NO width set ===== */
+/* Track naturally expands to hold all cards; viewport clips it */
 .cards-track {
   display: flex;
   will-change: transform;
 }
 
-/* ===== EACH SLIDE = 100% width, card centered via padding ===== */
+/* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  width: 100% !important;
-  min-width: 100% !important;
-  max-width: 100% !important;
-  flex: 0 0 100% !important;
-  padding: 2px 32px;
+  width: 75% !important;
+  min-width: 75% !important;
+  max-width: 75% !important;
+  flex: 0 0 75% !important;
+  margin: 2px 10%;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
-
 /* ===== FORCE ChatCard internals to obey container ===== */
 .card-slide :deep(*) {
   max-width: 100% !important;
@@ -433,20 +431,20 @@ export default {
   box-sizing: border-box !important;
 }
 
-/* ===== ARROWS — absolute to carousel-wrapper, never clipped ===== */
+/* ===== ARROWS — absolute overlay, zero layout impact ===== */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.92);
-  font-size: 15px;
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -458,10 +456,10 @@ export default {
   z-index: 10;
 }
 .carousel-arrow-left {
-  left: 4px;
+  left: 2px;
 }
 .carousel-arrow-right {
-  right: 4px;
+  right: 2px;
 }
 .carousel-arrow:hover {
   background: rgba(255, 255, 255, 0.97);
@@ -535,7 +533,7 @@ export default {
 }
 </style>
 
-<!-- UNSCOPED — kills horizontal scroll on ALL parent containers -->
+<!-- UNSCOPED — kills horizontal scroll on ALL parent containers above this component -->
 <style>
 .conversation-wrap,
 .conversation--container,
