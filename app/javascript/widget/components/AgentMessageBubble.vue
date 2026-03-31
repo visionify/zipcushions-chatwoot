@@ -328,17 +328,16 @@ export default {
 .carousel-wrapper {
   width: 100%;
   max-width: 100%;
-  padding: 4px 28px;
-  overflow: visible !important;
+  padding: 4px 0;
+  overflow: hidden !important;
 }
 
 .carousel-container {
   position: relative;
   width: 100%;
   max-width: 100%;
-  overflow: visible !important;
+  overflow: hidden !important;
 }
-
 /* ===== VIEWPORT — clips everything ===== */
 .cards-viewport {
   overflow: hidden !important;
@@ -358,11 +357,11 @@ export default {
 
 /* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
 .card-slide {
-  width: 72% !important;
-  min-width: 72% !important;
-  max-width: 72% !important;
-  flex: 0 0 72% !important;
-  margin: 2px auto;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  flex: 0 0 100% !important;
+  padding: 2px 32px;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
@@ -455,11 +454,12 @@ export default {
   line-height: 1;
   z-index: 10;
 }
+  
 .carousel-arrow-left {
-  left: -24px;
+  left: 6px;
 }
 .carousel-arrow-right {
-  right: -24px;
+  right: 6px;
 }
 .carousel-arrow:hover {
   background: rgba(255, 255, 255, 0.97);
