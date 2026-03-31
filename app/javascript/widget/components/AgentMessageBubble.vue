@@ -328,8 +328,8 @@ export default {
 .carousel-wrapper {
   width: 100%;
   max-width: 100%;
-  padding: 4px 0;
-  overflow: hidden !important;
+  padding: 4px 28px;
+  overflow: visible !important;
 }
 
 .carousel-container {
