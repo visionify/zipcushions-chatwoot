@@ -36,6 +36,7 @@ export default {
       touchStartX: null,
       touchStartY: null,
       isSwiping: false,
+      swipeHintTimer: null,
     };
   },
   setup() {
@@ -104,14 +105,14 @@ export default {
   },
   mounted() {
     if (this.isCards && this.totalCards > 2) {
-      setTimeout(() => {
+      this.swipeHintTimer = setTimeout(() => {
         this.showSwipeHint = false;
       }, 5000);
 
       this.$nextTick(() => {
         var viewport = this.$refs.cardsViewport;
         if (viewport) {
-          viewport.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+          viewport.addEventListener('touchstart', this.handleTouchStart, { passive: true });
           viewport.addEventListener('touchmove', this.handleTouchMove, { passive: false });
           viewport.addEventListener('touchend', this.handleTouchEnd, { passive: false });
         }
@@ -119,6 +120,10 @@ export default {
     }
   },
   beforeUnmount() {
+    if (this.swipeHintTimer) {
+      clearTimeout(this.swipeHintTimer);
+      this.swipeHintTimer = null;
+    }
     var viewport = this.$refs.cardsViewport;
     if (viewport) {
       viewport.removeEventListener('touchstart', this.handleTouchStart);
@@ -356,15 +361,12 @@ export default {
   will-change: transform;
 }
 
-/* ===== CARD = exactly 50% of VIEWPORT, no exceptions ===== */
+/* ===== CARD = exactly one viewport per slide ===== */
 .card-slide {
-  width: 75% !important;
-  min-width: 75% !important;
-  max-width: 75% !important;
-  flex: 0 0 75% !important;
-  margin: 2px 10%;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
+  flex: 0 0 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 /* ===== FORCE ChatCard internals to obey container ===== */
 .card-slide :deep(*) {
@@ -530,20 +532,5 @@ export default {
 }
 :global(.dark) .carousel-dot {
   background: #444;
-}
-</style>
-
-<!-- UNSCOPED — kills horizontal scroll on ALL parent containers above this component -->
-<style>
-.conversation-wrap,
-.conversation--container,
-.messages-list,
-.conversation-panel,
-.widget-body,
-.woot-widget-wrap,
-.chat-conversation--container,
-.conversation-panel > div,
-.messages-list > div {
-  overflow-x: hidden !important;
 }
 </style>
