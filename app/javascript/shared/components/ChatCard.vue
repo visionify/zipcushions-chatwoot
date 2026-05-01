@@ -79,7 +79,7 @@ export default {
           v-for="action in linkActions"
           :key="action.text"
           :action="action"
-          class="carousel-card__view-btn"
+          class="carousel-card__link-btn"
         />
         <button
           v-if="postbackAction"
@@ -88,7 +88,7 @@ export default {
           :disabled="isSelected"
           @click="onSelect"
         >
-          {{ isSelected ? 'Selected ✓' : postbackAction.text }}
+          {{ isSelected ? 'Selected' : postbackAction.text }}
         </button>
       </div>
     </div>
@@ -103,7 +103,7 @@ export default {
   overflow: hidden;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   transition: transform 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
 }
@@ -112,73 +112,74 @@ export default {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 .carousel-card--selected {
-  border: 2px solid #1b8ceb;
-  box-shadow: 0 2px 12px rgba(27, 140, 235, 0.25);
+  border: 2px solid #22c55e;
+  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.25);
 }
 
 /* Image */
 .carousel-card__image {
   width: 100%;
-  height: 100px;
+  height: 160px;
   object-fit: cover;
   display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 /* Body */
 .carousel-card__body {
-  padding: 8px 10px;
+  padding: 10px 12px;
 }
 
 /* Title */
 .carousel-card__title {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
   line-height: 1.3;
-  margin: 0 0 3px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin: 0 0 4px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Description */
 .carousel-card__desc {
-  font-size: 10px;
+  font-size: 12px;
   color: #888;
   line-height: 1.3;
-  margin: 0 0 6px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin: 0 0 8px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-/* Actions container */
+/* Actions — stacked vertically */
 .carousel-card__actions {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 6px;
 }
 
-/* View button override */
-.carousel-card__view-btn {
-  flex: 1;
+/* View Fabric button */
+.carousel-card__link-btn {
+  width: 100%;
 }
-.carousel-card__view-btn :deep(.action-button) {
-  font-size: 10px !important;
-  padding: 4px 0 !important;
+.carousel-card__link-btn :deep(.action-button) {
+  width: 100% !important;
+  font-size: 12px !important;
+  padding: 8px 12px !important;
   border-radius: 8px !important;
   margin-top: 0 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
 }
 
 /* Select button */
 .carousel-card__select-btn {
-  flex: 1;
-  padding: 4px 0;
+  width: 100%;
+  padding: 8px 12px;
   border: none;
   border-radius: 8px;
   color: #fff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -190,6 +191,7 @@ export default {
 }
 .carousel-card__select-btn:disabled {
   cursor: default;
+  opacity: 0.9;
 }
 
 /* Dark mode */

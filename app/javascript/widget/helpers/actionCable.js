@@ -62,14 +62,18 @@ class ActionCableConnector extends BaseActionCableConnector {
       .dispatch('conversation/addOrUpdateMessage', data)
       .then(() => emitter.emit(ON_AGENT_MESSAGE_RECEIVED));
 
+    // Refresh conversation attributes on every bot/agent message (picks up session_code etc.)
+    this.app.$store.dispatch('conversationAttributes/getAttributes');
+
+    if (data.sender_type === 'User') {
+      playNewMessageNotificationInWidget();
+    }
+
     IFrameHelper.sendMessage({
       event: 'onEvent',
       eventIdentifier: CHATWOOT_ON_MESSAGE,
       data,
     });
-    if (data.sender_type === 'User') {
-      playNewMessageNotificationInWidget();
-    }
   };
 
   onMessageUpdated = data => {

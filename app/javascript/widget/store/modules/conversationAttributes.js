@@ -8,10 +8,15 @@ import { getConversationAPI } from '../../api/conversation';
 const state = {
   id: '',
   status: '',
+  customAttributes: {},
 };
 
 export const getters = {
   getConversationParams: $state => $state,
+  getCustomAttributes: $state => $state.customAttributes,
+  getSessionCode: $state => {
+    return ($state.customAttributes && $state.customAttributes.session_code) || '';
+  },
 };
 
 export const actions = {
@@ -37,16 +42,23 @@ export const mutations = {
   [SET_CONVERSATION_ATTRIBUTES]($state, data) {
     $state.id = data.id;
     $state.status = data.status;
+    if (data.custom_attributes) {
+      $state.customAttributes = { ...$state.customAttributes, ...data.custom_attributes };
+    }
   },
   [UPDATE_CONVERSATION_ATTRIBUTES]($state, data) {
-    if (data.id === $state.id) {
-      $state.id = data.id;
-      $state.status = data.status;
+    if (data.id === $state.id || !$state.id) {
+      if (data.id) $state.id = data.id;
+      if (data.status) $state.status = data.status;
+      if (data.custom_attributes) {
+        $state.customAttributes = { ...$state.customAttributes, ...data.custom_attributes };
+      }
     }
   },
   [CLEAR_CONVERSATION_ATTRIBUTES]($state) {
     $state.id = '';
     $state.status = '';
+    $state.customAttributes = {};
   },
 };
 
