@@ -29,6 +29,8 @@ export default {
     return {
       previousScrollHeight: 0,
       previousConversationSize: 0,
+      isNearBottom: true,
+      resizeObserver: null,
     };
   },
   computed: {
@@ -63,6 +65,10 @@ export default {
   mounted() {
     this.$el.addEventListener('scroll', this.handleScroll);
     this.scrollToBottom();
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.isNearBottom) this.scrollToBottom();
+    });
+    this.resizeObserver.observe(this.$refs.conversationWrap);
   },
   updated() {
     if (this.previousConversationSize !== this.conversationSize) {
@@ -72,6 +78,7 @@ export default {
   },
   unmounted() {
     this.$el.removeEventListener('scroll', this.handleScroll);
+    this.resizeObserver?.disconnect();
   },
   methods: {
     ...mapActions('conversation', ['fetchOldConversations']),
@@ -81,6 +88,9 @@ export default {
       this.previousScrollHeight = 0;
     },
     handleScroll() {
+      const { scrollTop, scrollHeight, clientHeight } = this.$el;
+      this.isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+
       if (
         this.isFetchingList ||
         this.allMessagesLoaded ||
@@ -89,7 +99,7 @@ export default {
         return;
       }
 
-      if (this.$el.scrollTop < 100) {
+      if (scrollTop < 100) {
         this.fetchOldConversations({ before: this.earliestMessage.id });
         this.previousScrollHeight = this.$el.scrollHeight;
       }
@@ -100,7 +110,11 @@ export default {
 
 <template>
   <div class="conversation--container" :class="colorSchemeClass">
-    <div class="conversation-wrap" :class="{ 'is-typing': isAgentTyping }">
+    <div
+      ref="conversationWrap"
+      class="conversation-wrap"
+      :class="{ 'is-typing': isAgentTyping }"
+    >
       <div v-if="isFetchingList" class="message--loader">
         <Spinner />
       </div>
