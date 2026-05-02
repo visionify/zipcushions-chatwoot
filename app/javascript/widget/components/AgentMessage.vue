@@ -67,6 +67,9 @@ export default {
       const { content_type: type = '' } = this.message;
       return type;
     },
+    isCards() {
+      return this.contentType === 'cards';
+    },
     agentName() {
       if (this.message.sender) {
         return this.message.sender.available_name || this.message.sender.name;
@@ -169,6 +172,7 @@ export default {
     class="agent-message-wrap group"
     :class="{
       'has-response': hasRecordedResponse || isASubmittedForm,
+      'cards-layout': isCards,
     }"
   >
     <div v-if="!isASubmittedForm" class="agent-message">
@@ -264,3 +268,21 @@ export default {
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+.agent-message-wrap.cards-layout {
+  .avatar-wrap {
+    display: none;
+  }
+
+  .agent-message {
+    width: 100%;
+  }
+
+  .message-wrap {
+    margin-left: 0;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+</style>
