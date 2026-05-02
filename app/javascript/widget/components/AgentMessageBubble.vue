@@ -273,35 +273,33 @@ export default {
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Arrows overlaid ON TOP of cards — zero layout impact -->
+      <!-- Nav row: prev arrow, page dots, next arrow -->
+      <div v-if="hasMultipleCards" class="carousel-nav">
         <button
-          v-if="hasMultipleCards"
           class="carousel-arrow carousel-arrow-left"
           :class="{ disabled: !canGoPrev }"
           @click="prevPage"
         >
           ‹
         </button>
+        <div class="carousel-dots">
+          <span
+            v-for="page in totalPages"
+            :key="'page-' + page"
+            class="carousel-dot"
+            :class="{ active: (page - 1) === currentPage }"
+            @click="goToPage(page - 1)"
+          />
+        </div>
         <button
-          v-if="hasMultipleCards"
           class="carousel-arrow carousel-arrow-right"
           :class="{ disabled: !canGoNext }"
           @click="nextPage"
         >
           ›
         </button>
-      </div>
-
-      <!-- Page dots -->
-      <div v-if="hasMultipleCards" class="carousel-dots">
-        <span
-          v-for="page in totalPages"
-          :key="'page-' + page"
-          class="carousel-dot"
-          :class="{ active: (page - 1) === currentPage }"
-          @click="goToPage(page - 1)"
-        />
       </div>
 
       <div v-if="hasMultipleCards && showSwipeHint" class="swipe-hint">
@@ -350,12 +348,10 @@ export default {
   width: 100% !important;
   max-width: 100% !important;
   touch-action: none;
-  padding-right: 4px;
   box-sizing: border-box;
 }
 
 /* ===== TRACK — flex row, NO width set ===== */
-/* Track naturally expands to hold all cards; viewport clips it */
 .cards-track {
   display: flex;
   will-change: transform;
@@ -368,6 +364,7 @@ export default {
   box-sizing: border-box;
   overflow: hidden;
 }
+
 /* ===== FORCE ChatCard internals to obey container ===== */
 .card-slide :deep(*) {
   max-width: 100% !important;
@@ -389,10 +386,10 @@ export default {
 .card-slide :deep(.carousel-card__image) {
   width: 100% !important;
   max-width: 100% !important;
-  height: auto !important;
+  height: 140px !important;
   object-fit: cover;
-  max-height: 160px;
   display: block;
+  border-radius: 10px !important;
 }
 
 .card-slide :deep(h4),
@@ -433,55 +430,51 @@ export default {
   box-sizing: border-box !important;
 }
 
-/* ===== ARROWS — absolute overlay, zero layout impact ===== */
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.88);
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+/* ===== NAV ROW: arrows + dots inline below the card ===== */
+.carousel-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #333;
+  gap: 12px;
+  padding: 8px 0 4px 0;
+}
+
+.carousel-arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #4a4a4a;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
   transition: all 0.2s;
   user-select: none;
   padding: 0;
   line-height: 1;
-  z-index: 10;
-}
-.carousel-arrow-left {
-  left: 2px;
-}
-.carousel-arrow-right {
-  right: 2px;
+  flex-shrink: 0;
 }
 .carousel-arrow:hover {
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
-  color: #1b8ceb;
+  background: #2a2a2a;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
 .carousel-arrow:active {
-  transform: translateY(-50%) scale(0.9);
+  transform: scale(0.92);
 }
 .carousel-arrow.disabled {
-  opacity: 0;
+  opacity: 0.3;
   pointer-events: none;
 }
 
-/* ===== PAGE DOTS ===== */
+/* ===== PAGE DOTS (inside carousel-nav) ===== */
 .carousel-dots {
   display: flex;
-  justify-content: center;
   gap: 5px;
-  padding: 6px 0 2px 0;
 }
 .carousel-dot {
   width: 6px;
@@ -523,12 +516,11 @@ export default {
 
 /* ===== DARK MODE ===== */
 :global(.dark) .carousel-arrow {
-  background: rgba(42, 42, 42, 0.88);
-  color: #ccc;
+  background: #2a2a2a;
+  color: #ffffff;
 }
 :global(.dark) .carousel-arrow:hover {
-  background: rgba(50, 50, 50, 0.97);
-  color: #1b8ceb;
+  background: #1a1a1a;
 }
 :global(.dark) .carousel-dot {
   background: #444;
