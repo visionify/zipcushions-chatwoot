@@ -99,11 +99,12 @@ export default {
 .carousel-card {
   width: 100%;
   min-width: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1.5px solid #e0e0e0;
+  padding: 10px;
   transition: transform 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
 }
@@ -116,18 +117,18 @@ export default {
   box-shadow: 0 2px 12px rgba(34, 197, 94, 0.25);
 }
 
-/* Image */
+/* Image — framed inside the card with rounded corners */
 .carousel-card__image {
   width: 100%;
-  height: 160px;
+  height: 140px;
   object-fit: cover;
   display: block;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
 }
 
-/* Body */
+/* Body — tight padding since card already has 10px around */
 .carousel-card__body {
-  padding: 10px 12px;
+  padding: 10px 4px 4px 4px;
 }
 
 /* Title */
