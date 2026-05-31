@@ -45,6 +45,8 @@ export default {
       userInput: '',
       showEmojiPicker: false,
       isFocused: false,
+      sneakPeekTimer: null,
+      lastSentContent: '',
     };
   },
 
@@ -67,9 +69,13 @@ export default {
         this.focusInput();
       }
     },
+    userInput(newValue) {
+      this.scheduleSneakPeek(newValue);
+    },
   },
   unmounted() {
     document.removeEventListener('keypress', this.handleEnterKeyPress);
+    if (this.sneakPeekTimer) clearTimeout(this.sneakPeekTimer);
   },
   mounted() {
     document.addEventListener('keypress', this.handleEnterKeyPress);
@@ -111,13 +117,26 @@ export default {
       this.userInput = `${this.userInput}${emoji} `;
     },
     onTypingOff() {
-      this.toggleTyping('off');
+      if (this.sneakPeekTimer) clearTimeout(this.sneakPeekTimer);
+      this.lastSentContent = '';
+      this.toggleTyping('off', '');
     },
     onTypingOn() {
-      this.toggleTyping('on');
+      this.toggleTyping('on', this.userInput);
     },
-    toggleTyping(typingStatus) {
-      this.$store.dispatch('conversation/toggleUserTyping', { typingStatus });
+    toggleTyping(typingStatus, content) {
+      this.$store.dispatch('conversation/toggleUserTyping', {
+        typingStatus,
+        content,
+      });
+    },
+    scheduleSneakPeek(content) {
+      if (this.sneakPeekTimer) clearTimeout(this.sneakPeekTimer);
+      this.sneakPeekTimer = setTimeout(() => {
+        if (content === this.lastSentContent) return;
+        this.lastSentContent = content;
+        this.toggleTyping('on', content);
+      }, 300);
     },
     focusInput() {
       this.$refs.chatInput.focus();

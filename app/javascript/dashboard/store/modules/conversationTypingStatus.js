@@ -18,10 +18,10 @@ export const actions = {
       // Handle error
     }
   },
-  create: ({ commit }, { conversationId, user }) => {
+  create: ({ commit }, { conversationId, user, content }) => {
     commit(types.default.ADD_USER_TYPING_TO_CONVERSATION, {
       conversationId,
-      user,
+      user: { ...user, content: content || '' },
     });
   },
   destroy: ({ commit }, { conversationId, user }) => {
@@ -38,15 +38,21 @@ export const mutations = {
     { conversationId, user }
   ) => {
     const records = $state.records[conversationId] || [];
-    const hasUserRecordAlready = !!records.filter(
+    const existingIndex = records.findIndex(
       record => record.id === user.id && record.type === user.type
-    ).length;
-    if (!hasUserRecordAlready) {
-      $state.records = {
-        ...$state.records,
-        [conversationId]: [...records, user],
-      };
+    );
+    let updatedRecords;
+    if (existingIndex === -1) {
+      updatedRecords = [...records, user];
+    } else {
+      updatedRecords = records.map((record, idx) =>
+        idx === existingIndex ? { ...record, content: user.content } : record
+      );
     }
+    $state.records = {
+      ...$state.records,
+      [conversationId]: updatedRecords,
+    };
   },
   [types.default.REMOVE_USER_TYPING_FROM_CONVERSATION]: (
     $state,

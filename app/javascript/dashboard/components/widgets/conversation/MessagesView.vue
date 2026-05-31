@@ -130,6 +130,12 @@ export default {
 
       return '';
     },
+    sneakPeekContent() {
+      const userList = this.typingUsersList;
+      if (!userList.length) return '';
+      const withContent = userList.find(u => u.content && u.content.trim());
+      return withContent ? withContent.content : '';
+    },
     getMessages() {
       const messages = this.currentChat.messages || [];
       if (this.isAWhatsAppChannel) {
@@ -507,8 +513,15 @@ export default {
     >
       <div
         v-if="isAnyoneTyping"
-        class="absolute flex items-center w-full h-0 -top-7"
+        class="absolute flex flex-col items-center w-full"
+        :class="sneakPeekContent ? '-top-16' : '-top-7'"
       >
+        <div
+          v-if="sneakPeekContent"
+          class="max-w-[80%] mb-1 py-2 px-4 shadow-md rounded-2xl bg-n-slate-2 dark:bg-n-solid-2 text-n-slate-12 text-sm italic border border-dashed border-n-slate-6"
+        >
+          {{ sneakPeekContent }}
+        </div>
         <div
           class="flex py-2 pr-4 pl-5 shadow-md rounded-full bg-white dark:bg-n-solid-3 text-n-slate-11 text-xs font-semibold my-2.5 mx-auto"
         >

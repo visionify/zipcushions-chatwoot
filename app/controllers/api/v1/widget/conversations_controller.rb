@@ -44,11 +44,13 @@ class Api::V1::Widget::ConversationsController < Api::V1::Widget::BaseController
   end
 
   def toggle_typing
+    content = permitted_params[:content].to_s.first(500)
+
     case permitted_params[:typing_status]
     when 'on'
-      trigger_typing_event(CONVERSATION_TYPING_ON)
+      trigger_typing_event(CONVERSATION_TYPING_ON, content)
     when 'off'
-      trigger_typing_event(CONVERSATION_TYPING_OFF)
+      trigger_typing_event(CONVERSATION_TYPING_OFF, '')
     end
 
     head :ok
@@ -86,8 +88,8 @@ class Api::V1::Widget::ConversationsController < Api::V1::Widget::BaseController
     conversation.account.increment_email_sent_count
   end
 
-  def trigger_typing_event(event)
-    Rails.configuration.dispatcher.dispatch(event, Time.zone.now, conversation: conversation, user: @contact)
+  def trigger_typing_event(event, content = '')
+    Rails.configuration.dispatcher.dispatch(event, Time.zone.now, conversation: conversation, user: @contact, content: content)
   end
 
   def render_not_found_if_empty
@@ -95,8 +97,8 @@ class Api::V1::Widget::ConversationsController < Api::V1::Widget::BaseController
   end
 
   def permitted_params
-    params.permit(:id, :typing_status, :website_token, :email, contact: [:name, :email, :phone_number],
-                                                               message: [:content, :referer_url, :timestamp, :echo_id],
-                                                               custom_attributes: {})
+    params.permit(:id, :typing_status, :content, :website_token, :email, contact: [:name, :email, :phone_number],
+                                                                         message: [:content, :referer_url, :timestamp, :echo_id],
+                                                                         custom_attributes: {})
   end
 end
