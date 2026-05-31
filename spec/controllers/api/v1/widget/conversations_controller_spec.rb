@@ -175,7 +175,44 @@ RSpec.describe '/api/v1/widget/conversations/toggle_typing', type: :request do
 
         expect(response).to have_http_status(:success)
         expect(Rails.configuration.dispatcher).to have_received(:dispatch)
-          .with(Conversation::CONVERSATION_TYPING_ON, kind_of(Time), { conversation: conversation, user: contact })
+          .with(Conversation::CONVERSATION_TYPING_ON, kind_of(Time), { conversation: conversation, user: contact, content: '' })
+      end
+
+      it 'forwards the sneak peek content with the typing event' do
+        allow(Rails.configuration.dispatcher).to receive(:dispatch)
+        post '/api/v1/widget/conversations/toggle_typing',
+             headers: { 'X-Auth-Token' => token },
+             params: { typing_status: 'on', content: 'hi there', website_token: web_widget.website_token },
+             as: :json
+
+        expect(response).to have_http_status(:success)
+        expect(Rails.configuration.dispatcher).to have_received(:dispatch)
+          .with(Conversation::CONVERSATION_TYPING_ON, kind_of(Time), { conversation: conversation, user: contact, content: 'hi there' })
+      end
+
+      it 'caps sneak peek content at 500 characters' do
+        allow(Rails.configuration.dispatcher).to receive(:dispatch)
+        long_content = 'a' * 800
+        post '/api/v1/widget/conversations/toggle_typing',
+             headers: { 'X-Auth-Token' => token },
+             params: { typing_status: 'on', content: long_content, website_token: web_widget.website_token },
+             as: :json
+
+        expect(response).to have_http_status(:success)
+        expect(Rails.configuration.dispatcher).to have_received(:dispatch)
+          .with(Conversation::CONVERSATION_TYPING_ON, kind_of(Time), { conversation: conversation, user: contact, content: 'a' * 500 })
+      end
+
+      it 'sends empty content on typing off' do
+        allow(Rails.configuration.dispatcher).to receive(:dispatch)
+        post '/api/v1/widget/conversations/toggle_typing',
+             headers: { 'X-Auth-Token' => token },
+             params: { typing_status: 'off', content: 'should be ignored', website_token: web_widget.website_token },
+             as: :json
+
+        expect(response).to have_http_status(:success)
+        expect(Rails.configuration.dispatcher).to have_received(:dispatch)
+          .with(Conversation::CONVERSATION_TYPING_OFF, kind_of(Time), { conversation: conversation, user: contact, content: '' })
       end
     end
   end
