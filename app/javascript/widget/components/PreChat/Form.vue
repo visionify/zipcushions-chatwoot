@@ -36,7 +36,6 @@ export default {
     return {
       locale: this.$root.$i18n.locale,
       hasErrorInPhoneInput: false,
-      message: '',
       formValues: {},
       labels: {
         emailAddress: 'EMAIL_ADDRESS',
@@ -232,12 +231,11 @@ export default {
       return {};
     },
     onSubmit() {
-      const { emailAddress, fullName, phoneNumber, message } = this.formValues;
+      const { emailAddress, fullName, phoneNumber } = this.formValues;
       this.$emit('submitPreChat', {
         fullName,
         phoneNumber,
         emailAddress,
-        message,
         activeCampaignId: this.activeCampaign.id,
         conversationCustomAttributes: this.conversationCustomAttributes,
         contactCustomAttributes: this.contactCustomAttributes,
@@ -298,20 +296,6 @@ export default {
       }"
       :has-error-in-phone-input="hasErrorInPhoneInput"
     />
-    <FormKit
-      v-if="!hasActiveCampaign"
-      name="message"
-      type="textarea"
-      :label-class="context => `text-sm font-medium ${labelClass(context)}`"
-      :input-class="context => inputClass(context)"
-      :label="$t('PRE_CHAT_FORM.FIELDS.MESSAGE.LABEL')"
-      :placeholder="$t('PRE_CHAT_FORM.FIELDS.MESSAGE.PLACEHOLDER')"
-      validation="required"
-      :validation-messages="{
-        required: $t('PRE_CHAT_FORM.FIELDS.MESSAGE.ERROR'),
-      }"
-    />
-
     <CustomButton
       class="mt-3 mb-5 font-medium flex items-center justify-center gap-2"
       block
