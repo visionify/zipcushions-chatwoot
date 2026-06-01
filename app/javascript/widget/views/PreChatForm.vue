@@ -60,7 +60,7 @@ export default {
         this.$store.dispatch('conversation/createConversation', {
           fullName: fullName,
           emailAddress: emailAddress,
-          message: message,
+          message: '__WIDGET_INIT__',
           phoneNumber: phoneNumber,
           customAttributes: conversationCustomAttributes,
         });

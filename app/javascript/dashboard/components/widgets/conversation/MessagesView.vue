@@ -514,7 +514,7 @@ export default {
       <div
         v-if="isAnyoneTyping"
         class="absolute flex flex-col items-center w-full"
-        :class="sneakPeekContent ? '-top-16' : '-top-7'"
+        :class="sneakPeekContent ? '-top-24' : '-top-7'"
       >
         <div
           v-if="sneakPeekContent"

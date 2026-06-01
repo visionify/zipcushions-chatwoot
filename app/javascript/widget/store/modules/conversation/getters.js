@@ -24,8 +24,11 @@ export const getters = {
     return {};
   },
   getGroupedConversation: _state => {
+    const allMessages = Object.values(_state.conversations).filter(
+      m => m.content !== '__WIDGET_INIT__'
+    );
     const conversationGroupedByDate = groupBy(
-      Object.values(_state.conversations),
+      allMessages,
       message => formatUnixDate(message.created_at)
     );
     return Object.keys(conversationGroupedByDate).map(date => ({
